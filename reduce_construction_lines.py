@@ -6,6 +6,7 @@ from tqdm import tqdm
 from dataloader import cad2sketch_dataset_loader
 from torch.utils.data import DataLoader
 
+import gnn.gan
 import helper
 import gnn_graph
 import gnn.gnn
@@ -34,9 +35,14 @@ def save_models():
 # ------------------------------------------------------------------------------# 
 
 
-# Initialize graph encoder and decoder
-graph_encoder = gnn.gnn.SemanticModule()
-graph_decoder = gnn.gnn.Stroke_Decoder()
+# Initialize graph encoder and decoder for a gnn
+# graph_encoder = gnn.gnn.SemanticModule()
+# graph_decoder = gnn.gnn.Stroke_Decoder()
+
+#Initialize graph encoder and decoder for a gan
+graph_encoder = gnn.gan.SemanticGANModule()
+graph_decoder = gnn.gan.Stroke_Decoder_GAN()
+
 
 # Move models to device (GPU if available)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -175,8 +181,8 @@ def eval():
 
         # Visualize results
         all_edges_data = helper.read_json(all_edges_file_path[0])
-        # cad2sketch_stroke_features.vis_all_edges_selected(all_edges_data,pred_mask)
-        # cad2sketch_stroke_features.vis_all_edges_selected(all_edges_data,final_edges_matrix)
+        cad2sketch_stroke_features.vis_all_edges_selected(all_edges_data,pred_mask)
+        cad2sketch_stroke_features.vis_all_edges_selected(all_edges_data,final_edges_matrix)
 
         cad2sketch_stroke_features.vis_all_edges_only_selected(all_edges_data,pred_mask)
         cad2sketch_stroke_features.vis_all_edges_only_selected(all_edges_data,final_edges_matrix)
