@@ -35,7 +35,7 @@ def save_models():
 # ------------------------------------------------------------------------------# 
 
 
-# Initialize graph encoder and decoder for a gnn
+# # Initialize graph encoder and decoder for a gnn
 # graph_encoder = gnn.gnn.SemanticModule()
 # graph_decoder = gnn.gnn.Stroke_Decoder()
 
@@ -75,15 +75,17 @@ def train():
 
         graphs.append(cur_gnn_graph)
         final_edges_mask.append(final_edges_matrix)
-
+        # For debugging purposes 
+        if(len(graphs) > 20):
+            break
 
     # Split dataset
     split_index = int(0.8 * len(graphs))
-    train_graphs, val_graphs = graphs[:split_index], graphs[split_index:]
-    train_masks, val_masks = final_edges_mask[:split_index], final_edges_mask[split_index:]
+    train_graphs, val_graphs = graphs[:], graphs[:]
+    train_masks, val_masks = final_edges_mask[:], final_edges_mask[:]
 
     # Training loop
-    epochs = 30
+    epochs = 100
     best_accuracy = 0.0
 
     for epoch in range(epochs):
@@ -182,10 +184,10 @@ def eval():
         # Visualize results
         all_edges_data = helper.read_json(all_edges_file_path[0])
         cad2sketch_stroke_features.vis_all_edges_selected(all_edges_data,pred_mask)
-        cad2sketch_stroke_features.vis_all_edges_selected(all_edges_data,final_edges_matrix)
+        #cad2sketch_stroke_features.vis_all_edges_selected(all_edges_data,final_edges_matrix)
 
         cad2sketch_stroke_features.vis_all_edges_only_selected(all_edges_data,pred_mask)
-        cad2sketch_stroke_features.vis_all_edges_only_selected(all_edges_data,final_edges_matrix)
+        #cad2sketch_stroke_features.vis_all_edges_only_selected(all_edges_data,final_edges_matrix)
 
 
 
