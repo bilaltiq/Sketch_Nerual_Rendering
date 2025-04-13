@@ -1,5 +1,5 @@
 import torch.nn as nn
-from torch_geometric.nn import EdgeConv, HeteroConv, GCNConv
+from torch_geometric.nn import EdgeConv, HeteroConv, GCNConv, GATConv
 from torch_geometric.nn.models import MLP
 import numpy as np
 from torch_geometric.nn import aggr
@@ -63,12 +63,14 @@ class MultiSeq(nn.Sequential):
 
 
 class GeneralHeteroConv(torch.nn.Module):
-    def __init__(self, gcn_types, in_channels, out_channels, instance_net_type = None):
+    def __init__(self, gcn_types, in_channels, out_channels, instance_net_type = None, conv_class=EdgeConv, conv_kwargs=None):
         super(GeneralHeteroConv, self).__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.gcn_types = gcn_types
         self.instance_net_type = instance_net_type
+        self.conv_class = conv_class
+        self.conv_kwargs = conv_kwargs if conv_kwargs is not None else {}
         self.gconv = HeteroConv(self.create_HeteroConv_dict(), aggr='mean')
             
     def find_aggr_fun(self):
@@ -95,6 +97,16 @@ class GeneralHeteroConv(torch.nn.Module):
                                                     ),
                                                     aggr=aggr_fns[i]
                                                 )
+            
+            elif self.conv_class == GATConv:
+                conv_layer = GATConv(
+                    self.in_channels,
+                    self.out_channels,
+                    **self.conv_kwargs
+                )
+
+                heteroConv_dict[edges_types[i]] = conv_layer
+
             else:
                 heteroConv_dict[edges_types[i]] = EdgeConv(
                                                     nn=MLPLinear(
