@@ -6,14 +6,14 @@ from torch_geometric.data import HeteroData
 
 import gnn.basic
 
-class SemanticModule(nn.Module):
+class SemanticGANModule(nn.Module):
     def __init__(self, in_channels=6):
-        super(SemanticModule, self).__init__()
-        self.local_head = gnn.basic.GeneralHeteroConv(['connected_to_sum', 'ordered_next_sum'], in_channels, 16, conv_class=GATConv, conv_kwargs={'heads': 3, 'concat': False})
+        super(SemanticGANModule, self).__init__()
+        self.local_head = gnn.basic.GeneralHeteroConv(['connected_to_sum', 'ordered_next_sum'], in_channels, 16, conv_class=GATConv, conv_kwargs={'heads': 1, 'concat': False})
 
         self.layers = nn.ModuleList([
-            gnn.basic.ResidualGeneralHeteroConvBlock(['connected_to_sum', 'ordered_next_sum'], 16, 32),
-            gnn.basic.ResidualGeneralHeteroConvBlock(['represents_sum', 'represented_by_sum', 'neighboring_vertical_mean', 'neighboring_horizontal_mean', 'contains_sum', 'order_add', 'perpendicular_mean'], 32, 64),
+            gnn.basic.ResidualGeneralHeteroConvBlock(['connected_to_sum', 'ordered_next_sum'],16, 32, conv_class=GATConv, conv_kwargs={'heads': 1, 'concat': False}),
+            gnn.basic.ResidualGeneralHeteroConvBlock(['represents_sum', 'represented_by_sum', 'neighboring_vertical_mean', 'neighboring_horizontal_mean', 'contains_sum', 'order_add', 'perpendicular_mean'], 32, 64, conv_class=GATConv, conv_kwargs={'heads': 1, 'concat': False} ),
 
         ])
 
@@ -25,18 +25,18 @@ class SemanticModule(nn.Module):
         for layer in self.layers:
             x_dict = layer(x_dict, edge_index_dict)
         
-        x_dict = {key: x.relu() for key, x in x_dict.items()}
+        x_dict = {key: F.elu(x) for key, x in x_dict.items()}
 
         return x_dict
 
 
 
-class Stroke_Decoder(nn.Module):
-    def __init__(self, hidden_channels=128):
-        super(Stroke_Decoder, self).__init__()
+class Stroke_Decoder_GAN(nn.Module):
+    def __init__(self, hidden_channels=128, heads=1):
+        super(Stroke_Decoder_GAN, self).__init__()
 
         self.decoder = nn.Sequential(
-            nn.Linear(64, hidden_channels),
+            nn.Linear( 2*32*heads, hidden_channels),
             nn.ReLU(inplace=True),
             nn.Dropout(p=0.1),
             nn.Linear(hidden_channels, 16),

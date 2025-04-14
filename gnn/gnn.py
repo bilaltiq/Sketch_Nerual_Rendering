@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch_geometric.nn import HeteroConv, GCNConv, EdgeConv
+from torch_geometric.nn import HeteroConv, GCNConv, EdgeConv, GATConv
 from torch_geometric.data import HeteroData
 
 import gnn.basic
@@ -46,4 +46,4 @@ class Stroke_Decoder(nn.Module):
         )
 
     def forward(self, x_dict):
-        return torch.sigmoid(self.decoder(x_dict['stroke']))
+        return self.decoder(x_dict['stroke'])

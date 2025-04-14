@@ -104,7 +104,6 @@ class GeneralHeteroConv(torch.nn.Module):
                     self.out_channels,
                     **self.conv_kwargs
                 )
-
                 heteroConv_dict[edges_types[i]] = conv_layer
 
             else:
@@ -137,11 +136,12 @@ class GeneralHeteroConv(torch.nn.Module):
     
 
 class ResidualGeneralHeteroConvBlock(nn.Module):
-    def __init__(self, gcn_types, in_channels, out_channels, is_instance_net=False):
+    def __init__(self, gcn_types, in_channels, out_channels, is_instance_net=False, conv_class=EdgeConv, conv_kwargs=None):
         super(ResidualGeneralHeteroConvBlock, self).__init__()
         self.mlp_edge_conv = GeneralHeteroConv(gcn_types, in_channels, out_channels, is_instance_net)
+        self.conv_class = conv_class
+
         self.residual = (in_channels == out_channels)
-        
         if not self.residual:
             self.projection = nn.Linear(in_channels, out_channels)
 
