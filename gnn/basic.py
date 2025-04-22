@@ -1,5 +1,5 @@
 import torch.nn as nn
-from torch_geometric.nn import EdgeConv, HeteroConv, GCNConv, GATConv
+from torch_geometric.nn import EdgeConv, HeteroConv, GCNConv, GATConv, GATv2Conv
 from torch_geometric.nn.models import MLP
 import numpy as np
 from torch_geometric.nn import aggr
@@ -104,6 +104,7 @@ class GeneralHeteroConv(torch.nn.Module):
                     self.out_channels,
                     **self.conv_kwargs
                 )
+                # print('debug')
                 heteroConv_dict[edges_types[i]] = conv_layer
 
             else:
@@ -138,7 +139,10 @@ class GeneralHeteroConv(torch.nn.Module):
 class ResidualGeneralHeteroConvBlock(nn.Module):
     def __init__(self, gcn_types, in_channels, out_channels, is_instance_net=False, conv_class=EdgeConv, conv_kwargs=None):
         super(ResidualGeneralHeteroConvBlock, self).__init__()
-        self.mlp_edge_conv = GeneralHeteroConv(gcn_types, in_channels, out_channels, is_instance_net)
+
+        self.conv_kwargs = conv_kwargs or {}
+
+        self.mlp_edge_conv = GeneralHeteroConv(gcn_types, in_channels, out_channels, is_instance_net, conv_class=conv_class, conv_kwargs=self.conv_kwargs)
         self.conv_class = conv_class
 
         self.residual = (in_channels == out_channels)

@@ -9,11 +9,11 @@ import gnn.basic
 class SemanticGANModule(nn.Module):
     def __init__(self, in_channels=6):
         super(SemanticGANModule, self).__init__()
-        self.local_head = gnn.basic.GeneralHeteroConv(['connected_to_sum', 'ordered_next_sum'], in_channels, 16, conv_class=GATConv, conv_kwargs={'heads': 1, 'concat': False})
+        self.local_head = gnn.basic.GeneralHeteroConv(['connected_to_sum', 'ordered_next_sum'], in_channels, 16, conv_class=GATConv, conv_kwargs={'heads': 12, 'concat': False})
 
         self.layers = nn.ModuleList([
-            gnn.basic.ResidualGeneralHeteroConvBlock(['connected_to_sum', 'ordered_next_sum'],16, 32, conv_class=GATConv, conv_kwargs={'heads': 1, 'concat': False}),
-            gnn.basic.ResidualGeneralHeteroConvBlock(['represents_sum', 'represented_by_sum', 'neighboring_vertical_mean', 'neighboring_horizontal_mean', 'contains_sum', 'order_add', 'perpendicular_mean'], 32, 64, conv_class=GATConv, conv_kwargs={'heads': 1, 'concat': False} ),
+            gnn.basic.ResidualGeneralHeteroConvBlock(['connected_to_sum', 'ordered_next_sum'],16, 32, conv_class=GATConv, conv_kwargs={'heads': 12, 'concat': False}),
+            gnn.basic.ResidualGeneralHeteroConvBlock(['represents_sum', 'represented_by_sum', 'neighboring_vertical_mean', 'neighboring_horizontal_mean', 'contains_sum', 'order_add', 'perpendicular_mean'], 32, 64, conv_class=GATConv, conv_kwargs={'heads': 12, 'concat': False} ),
 
         ])
 
@@ -32,13 +32,13 @@ class SemanticGANModule(nn.Module):
 
 
 class Stroke_Decoder_GAN(nn.Module):
-    def __init__(self, hidden_channels=128, heads=1):
+    def __init__(self, hidden_channels=128):
         super(Stroke_Decoder_GAN, self).__init__()
 
         self.decoder = nn.Sequential(
-            nn.Linear( 2*32*heads, hidden_channels),
+            nn.Linear( 64, hidden_channels),
             nn.ReLU(inplace=True),
-            nn.Dropout(p=0.1),
+            nn.Dropout(p=0.2),
             nn.Linear(hidden_channels, 16),
             nn.ReLU(inplace=True),
             nn.Linear(16, 1),
