@@ -443,6 +443,7 @@ def vis_all_edges_selected(all_edges_json, mask):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     ax.grid(False)
+    ax.set_axis_off()
 
     # Loop through all strokes and visualize them with different colors based on the mask
     for i, stroke in enumerate(all_edges_json):
@@ -483,6 +484,7 @@ def vis_all_edges_only_selected(all_edges_json, mask):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     ax.grid(False)
+    ax.set_axis_off()
 
     # Loop through all strokes and visualize only the selected ones
     for i, stroke in enumerate(all_edges_json):
@@ -498,7 +500,7 @@ def vis_all_edges_only_selected(all_edges_json, mask):
             z_values = [point[2] for point in geometry]
 
             # Plot only selected strokes
-            ax.plot(x_values, y_values, z_values, color='black', linewidth=0.5)
+            ax.plot(x_values, y_values, z_values, color='red', linewidth=0.5)
 
     # Set axis labels
     ax.set_xlabel('X')

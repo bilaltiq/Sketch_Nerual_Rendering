@@ -39,18 +39,17 @@ def save_models():
 # graph_encoder = gnn.gnn.SemanticModule()
 # graph_decoder = gnn.gnn.Stroke_Decoder()
 
-#Initialize graph encoder and decoder for a gan
+#Initialize graph encoder and decoder for a GAT
 graph_encoder = gnn.gan.SemanticGANModule()
 graph_decoder = gnn.gan.Stroke_Decoder_GAN()
 
-
 # Move models to device (GPU if available)
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cpu")
 graph_encoder.to(device)
 graph_decoder.to(device)
 
 # Define optimizer and loss function
-optimizer = optim.Adam(list(graph_encoder.parameters()) + list(graph_decoder.parameters()), lr=0.001)
+optimizer = optim.Adam(list(graph_encoder.parameters()) + list(graph_decoder.parameters()), lr=0.003, weight_decay=0)
 criterion = nn.BCEWithLogitsLoss()  # Binary classification loss
 
 
@@ -76,16 +75,16 @@ def train():
         graphs.append(cur_gnn_graph)
         final_edges_mask.append(final_edges_matrix)
         # For debugging purposes 
-        if(len(graphs) > 20):
-            break
+        # if(len(graphs) > 20):
+        #     break
 
     # Split dataset
     split_index = int(0.8 * len(graphs))
-    train_graphs, val_graphs = graphs[:], graphs[:]
-    train_masks, val_masks = final_edges_mask[:], final_edges_mask[:]
+    train_graphs, val_graphs = graphs[:split_index], graphs[split_index:]
+    train_masks, val_masks = final_edges_mask[:split_index], final_edges_mask[split_index:]
 
     # Training loop
-    epochs = 100
+    epochs = 30
     best_accuracy = 0.0
 
     for epoch in range(epochs):
@@ -104,6 +103,18 @@ def train():
             # Compute loss
             loss = criterion(output, mask)  # BCEWithLogitsLoss expects (batch, 1)
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(graph_encoder.parameters(), max_norm=2.0)
+
+
+            #Monitoring gradients
+            # for name, param in list(simple_gat_encoder.named_parameters()) + list(graph_decoder.named_parameters()):
+            #     if param.grad is not None:
+            #         grad_norm = param.grad.norm().item()
+            #         print(f"{name}: gradient norm = {grad_norm:.6f}")
+            #     else:
+            #          print(f"{name}: NO GRADIENT")
+
+
             optimizer.step()
 
             total_loss += loss.item()
@@ -150,7 +161,7 @@ def train():
 
 def eval():
     """Evaluate the trained model and visualize prediction results."""
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cpu")
 
     # Load trained models
     load_models()
@@ -183,14 +194,14 @@ def eval():
 
         # Visualize results
         all_edges_data = helper.read_json(all_edges_file_path[0])
-        cad2sketch_stroke_features.vis_all_edges_selected(all_edges_data,pred_mask)
-        #cad2sketch_stroke_features.vis_all_edges_selected(all_edges_data,final_edges_matrix)
+        # cad2sketch_stroke_features.vis_all_edges_selected(all_edges_data,pred_mask)
+        # cad2sketch_stroke_features.vis_all_edges_selected(all_edges_data,final_edges_matrix)
 
-        cad2sketch_stroke_features.vis_all_edges_only_selected(all_edges_data,pred_mask)
-        #cad2sketch_stroke_features.vis_all_edges_only_selected(all_edges_data,final_edges_matrix)
+        # cad2sketch_stroke_features.vis_all_edges_only_selected(all_edges_data,pred_mask)
+        cad2sketch_stroke_features.vis_all_edges_only_selected(all_edges_data,final_edges_matrix)
 
 
 
 # ------------------------------------------------------------------------------# 
-train()
+eval()
 

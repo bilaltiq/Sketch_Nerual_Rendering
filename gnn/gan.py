@@ -9,14 +9,14 @@ import gnn.basic
 class SemanticGANModule(nn.Module):
     def __init__(self, in_channels=6):
         super(SemanticGANModule, self).__init__()
-        self.local_head = gnn.basic.GeneralHeteroConv(['connected_to_sum', 'ordered_next_sum'], in_channels, 16, conv_class=GATConv, conv_kwargs={'heads': 12, 'concat': False})
+        self.local_head = gnn.basic.GeneralHeteroConv(['connected_to_sum', 'ordered_next_sum'], in_channels, 16, conv_class=GATConv, conv_kwargs={'heads': 12, 'concat': False, 'edge_dim': 7})
 
         self.layers = nn.ModuleList([
-            gnn.basic.ResidualGeneralHeteroConvBlock(['connected_to_sum', 'ordered_next_sum'],16, 32, conv_class=GATConv, conv_kwargs={'heads': 12, 'concat': False}),
-            gnn.basic.ResidualGeneralHeteroConvBlock(['represents_sum', 'represented_by_sum', 'neighboring_vertical_mean', 'neighboring_horizontal_mean', 'contains_sum', 'order_add', 'perpendicular_mean'], 32, 64, conv_class=GATConv, conv_kwargs={'heads': 12, 'concat': False} ),
+            gnn.basic.ResidualGeneralHeteroConvBlock(['connected_to_sum', 'ordered_next_sum'],16, 32, conv_class=GATConv, conv_kwargs={'heads': 12, 'concat': False, 'edge_dim': 7}),
+            gnn.basic.ResidualGeneralHeteroConvBlock(['represents_sum', 'represented_by_sum', 'neighboring_vertical_mean', 'neighboring_horizontal_mean', 'contains_sum', 'order_add', 'perpendicular_mean'], 32, 64, conv_class=GATConv, conv_kwargs={'heads': 12, 'concat': False, 'edge_dim': 7} ),
 
         ])
-
+ 
 
     def forward(self, x_dict, edge_index_dict):
 
